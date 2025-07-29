@@ -1,108 +1,83 @@
 import streamlit as st
-import numpy as np
-import base64
-import io
-
+url = 'https://www.youtube.com/watch?v=XyEOEBsa8I4'
 # 페이지 설정
 st.set_page_config(layout='wide', page_title='EthicApp')
 
-# 사이드바 메뉴 선택
-menu = st.sidebar.radio("Menu", ["홈", "AI 윤리 개요", "딥페이크 음성", "참고 자료"])
+# 앱 타이틀
+st.title('Ethic is good for us')
 
-# YouTube 영상 링크
-url = 'https://www.youtube.com/watch?v=XyEOEBsa8I4'
+# # 사이드바 메뉴
+# # (사이드바 버튼 추가): "학생데이터 가져오기" 버튼을 추가하고, 클릭했을 때, CONTENT영역에 저장된 학생 데이터(data.txt)를 불러와서 제시합니다.
+# st.sidebar.subheader('Menu...')
+# st.sidebar.markdown("""
+# - 홈  
+# - AI 윤리 개요  
+# - 사례 분석  
+# - 참고 자료
+# """)  # 기존 사이드바 유지
 
-# 간단한 음성 생성 함수 (진짜 vs 가짜)
-def generate_synthetic_audio(is_real=True, duration=3, sr=22050):
-    t = np.linspace(0, duration, int(sr * duration))
-    if is_real:
-        freq = 200 + 100 * np.sin(2 * np.pi * 0.1 * t)
-        audio = 0.5 * np.sin(2 * np.pi * freq * t)
-    else:
-        freq = 200 + 50 * np.sin(2 * np.pi * 0.2 * t)
-        audio = 0.5 * np.sin(2 * np.pi * freq * t) + 0.1 * np.random.randn(len(t))
-    return audio, sr
+# 사이드바 메뉴
+st.sidebar.subheader('Menu...')
+st.sidebar.markdown("""
+- 홈  
+- AI 윤리 개요  
+- 사례 분석  
+- 참고 자료
+""")  # 기존 사이드바 유지
 
-# 오디오 재생용 플레이어 (파일 저장 없이 base64로 임베드)
-def get_audio_player(audio, sr):
+
+# "학생데이터 가져오기" 버튼 추가
+if st.sidebar.button("학생데이터(더블클릭)"):
+    # data.txt 파일에서 데이터 읽기
     try:
-        import soundfile as sf  # optional: 제거해도 됨
-        buffer = io.BytesIO()
-        sf.write(buffer, audio, sr, format='WAV')
-        audio_base64 = base64.b64encode(buffer.getvalue()).decode()
-        return f'<audio controls><source src="data:audio/wav;base64,{audio_base64}" type="audio/wav"></audio>'
-    except:
-        return "⚠️ 오디오 플레이어를 지원하지 않습니다."
+        with open("data.txt", "r", encoding="utf-8") as f:
+            student_data = f.read()  # 전체 파일 내용 읽기
+        # 콘텐츠 영역에 학생 데이터 표시
+        st.subheader("학생 데이터")
+        st.text_area("저장된 학생 데이터", student_data, height=300)
+    except FileNotFoundError:
+        st.error("data.txt 파일을 찾을 수 없습니다.")
 
-# 딥페이크 음성 탐지 체험 화면 (간단 기능만)
-def run_deepfake_demo():
-    st.title("🎙️ 딥페이크 음성 탐지 웹앱 (간단 체험)")
-    st.markdown("""
-    이 앱은 진짜 음성과 딥페이크 음성을 구별하는 과정을 체험할 수 있도록 제작되었습니다.
-    
-    음성을 생성하고 직접 들어보세요!
-    """)
+# 내용 제시 영역 및 화면 분할
+content_col, tips_col = st.columns([4, 1])  # 컬럼 비율 (4,1)
 
-    col1, col2 = st.columns(2)
+# 왼쪽 넓은 content 영역
+with content_col:
+    st.subheader("AI Ethics and Responsibility")
+    st.video(url)  # YouTube 영상
 
-    with col1:
-        if st.button("진짜 음성 생성"):
-            audio, sr = generate_synthetic_audio(is_real=True)
-            st.markdown("✔️ 진짜 음성 샘플 생성됨")
-            st.markdown(get_audio_player(audio, sr), unsafe_allow_html=True)
-
-    with col2:
-        if st.button("가짜 음성 생성"):
-            audio, sr = generate_synthetic_audio(is_real=False)
-            st.markdown("✔️ 가짜 음성 샘플 생성됨")
-            st.markdown(get_audio_player(audio, sr), unsafe_allow_html=True)
-
-    st.markdown("또는 직접 WAV 파일을 업로드해보세요.")
-    uploaded_file = st.file_uploader("WAV 파일 업로드", type=["wav"])
-    if uploaded_file:
-        st.markdown("✔️ 파일 업로드 완료 (재생 기능은 생략됨)")
-
-# 메뉴 라우팅
-if menu == "홈":
-    st.title('Ethic is good for us')
-    content_col, tips_col = st.columns([4, 1])
-
-    with content_col:
-        st.subheader("AI Ethics and Responsibility")
-        st.video(url)
-        st.write("""
+    st.write("""
         인공지능(AI)은 현대 사회를 변화시키는 핵심 기술입니다.  
         그러나 AI의 사용에는 윤리적 고려가 반드시 따라야 하며, 우리는 다음과 같은 원칙을 따라야 합니다:
-        - **공정성 (Fairness)**  
-        - **책임성 (Accountability)**  
-        - **투명성 (Transparency)**  
-        - **프라이버시 보호 (Privacy Protection)**
-        """)
+        
+        - **공정성 (Fairness)**: 알고리즘은 누구에게도 불공정한 결과를 내지 않아야 합니다.  
+        - **책임성 (Accountability)**: AI 시스템으로 인한 결과에 대해 책임 소재가 분명해야 합니다.  
+        - **투명성 (Transparency)**: 의사결정 과정이 이해 가능하고 설명 가능해야 합니다.  
+        - **프라이버시 보호 (Privacy)**: 개인 정보는 철저히 보호되어야 합니다.
+    """)
 
-        user_opinion = st.text_area("여러분의 의견을 남겨주세요:")
-        if st.button("제출"):
-            if user_opinion:
-                with open("data.txt", "a") as file:
-                    file.write(f"{user_opinion}\n")
-                st.success("의견이 성공적으로 제출되었습니다.")
-            else:
-                st.warning("의견을 입력해주세요.")
+    # 🔽 사용자 입력 영역 (추가된 부분)
+    st.markdown("#### ✍️ 당신의 생각을 공유해주세요")
+    user_input = st.text_area("인공지능 윤리에 대한 의견 또는 질문을 작성해주세요:", height=100)
+    if st.button("제출하기"):
+        if user_input.strip():  # 빈 문자열은 저장하지 않음
+            with open("data.txt", "a", encoding="utf-8") as f:
+                f.write(user_input + "\n---\n")  # 구분선 포함하여 저장
+            st.success("의견이 성공적으로 저장되었습니다.")
+        else:
+            st.warning("내용을 입력해주세요.")
 
-    with tips_col:
-        st.subheader("AI 윤리 개요")
-        st.markdown("""
-        1. **공정성**: AI가 편향된 결정을 내리지 않도록 해야 합니다.  
-        2. **책임성**: AI의 결정에 인간이 책임을 져야 합니다.  
-        3. **투명성**: AI가 어떻게 작동하는지 이해 가능해야 합니다.  
-        4. **프라이버시 보호**: 개인정보를 안전하게 보호해야 합니다.  
-        """)
+# 오른쪽 좁은 tips 영역
+with tips_col:
+    st.subheader("Tips...")
+    st.markdown("""
+    ✅ **AI 윤리 체크리스트**  
+    - [ ] 데이터 편향 점검  
+    - [ ] 결과 설명 가능성 확보  
+    - [ ] 사용자 동의 확보  
+    - [ ] 지속적 모니터링 체계  
 
-elif menu == "AI 윤리 개요":
-    st.header("AI 윤리 원칙에 대해 더 알아보기")
-    st.write("좌측 설명을 참고해 주세요.")
-
-elif menu == "딥페이크 음성":
-    run_deepfake_demo()
-
-elif menu == "참고 자료":
-    st.write("참고 자료 섹션입니다. 관련 문서 및 링크를 제공합니다.")
+    📌 **참고 링크**  
+    - [OECD AI 원칙](https://oecd.ai/en/dashboards)  
+    - [AI 윤리 가이드라인 (EU)](https://digital-strategy.ec.europa.eu/en/policies/european-approach-artificial-intelligence)
+    """)
