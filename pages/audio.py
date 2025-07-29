@@ -7,6 +7,8 @@ import io
 st.set_page_config(layout='wide', page_title='EthicApp')
 
 # 사이드바 메뉴 선택
+# 만약에 딥페이크 음성말고 다른 라디오 버튼 추가하고 싶으시면 menu = st.sidebar.radio("Menu", ["딥페이크 음성", "추가하고 싶은 것"]) 이렇게 넣으시면 됩니다.
+# 그리고 추가하신다면 69번 줄로 내려오세요.
 menu = st.sidebar.radio("Menu", ["딥페이크 음성"])
 
 # YouTube 영상 링크
@@ -63,7 +65,9 @@ def run_deepfake_demo():
         st.markdown("✔️ 파일 업로드 완료 (재생 기능은 생략됨)")
 
 # 메뉴 라우팅
-
+# 위에 10번처럼 "추가하고 싶은 것" 있다면 elif 쓰셔야 합니다. ex) elif meenu == "추가하고 싶은 것": 72번 참고해서 사용하시면 됩니다.
 if menu == "딥페이크 음성":
     run_deepfake_demo()
 
+# elif menu == "추가하고 싶은 것":
+#     st.write("추가하고 싶은 곳 섹션입니다. 관련 문서 넣어주세요.")
